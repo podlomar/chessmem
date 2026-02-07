@@ -1,9 +1,21 @@
+import './style.css';
+
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const ROUND_COUNT = 20;
 
+// --- Types ---
+type GameState = 'idle' | 'playing' | 'done';
+type SquareColor = 'light' | 'dark';
+
+interface Level {
+  label: string;
+  description: string;
+  squares: string[];
+}
+
 // --- Levels ---
-const squaresFrom = (files, ranks) => {
-  const result = [];
+const squaresFrom = (files: string, ranks: string): string[] => {
+  const result: string[] = [];
   for (const f of files) {
     for (const r of ranks) {
       result.push(f + r);
@@ -12,7 +24,7 @@ const squaresFrom = (files, ranks) => {
   return result;
 };
 
-const LEVELS = [
+const LEVELS: Level[] = [
   { label: '1', description: 'a-c 1-3', squares: squaresFrom('abc', '123') },
   { label: '2', description: '+ d-e 1-3', squares: squaresFrom('de', '123') },
   { label: '3', description: '+ f-h 1-3', squares: squaresFrom('fgh', '123') },
@@ -20,8 +32,8 @@ const LEVELS = [
 
 let currentLevel = 0;
 
-const getActiveSquares = () => {
-  const pool = [];
+const getActiveSquares = (): string[] => {
+  const pool: string[] = [];
   for (let i = 0; i <= currentLevel; i++) {
     pool.push(...LEVELS[i].squares);
   }
@@ -31,11 +43,11 @@ const getActiveSquares = () => {
 // --- Voice feedback ---
 const synth = window.speechSynthesis;
 
-const speakSquare = (square) => {
+const speakSquare = (square: string): string => {
   return square[0].toUpperCase() + ' ' + square[1];
 };
 
-const speak = (text, onEnd) => {
+const speak = (text: string, onEnd?: () => void): void => {
   synth.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.9;
@@ -45,37 +57,37 @@ const speak = (text, onEnd) => {
 
 // --- State ---
 // 'idle' = waiting to start, 'playing' = in session, 'done' = showing results
-let state = 'idle';
-let currentSquare = null;
+let state: GameState = 'idle';
+let currentSquare: string | null = null;
 let correct = 0;
 let total = 0;
-let history = [];
+let history: boolean[] = [];
 let locked = false;
 
 // --- DOM refs ---
-const squareDisplay = document.getElementById('squareDisplay');
-const correctCount = document.getElementById('correctCount');
-const totalCount = document.getElementById('totalCount');
-const accuracyValue = document.getElementById('accuracyValue');
-const streakBar = document.getElementById('streakBar');
-const startBtn = document.getElementById('startBtn');
-const btnLight = document.getElementById('btnLight');
-const btnDark = document.getElementById('btnDark');
-const progressDisplay = document.getElementById('progressDisplay');
+const squareDisplay = document.getElementById('squareDisplay')!;
+const correctCount = document.getElementById('correctCount')!;
+const totalCount = document.getElementById('totalCount')!;
+const accuracyValue = document.getElementById('accuracyValue')!;
+const streakBar = document.getElementById('streakBar')!;
+const startBtn = document.getElementById('startBtn')!;
+const btnLight = document.getElementById('btnLight') as HTMLButtonElement;
+const btnDark = document.getElementById('btnDark') as HTMLButtonElement;
+const progressDisplay = document.getElementById('progressDisplay')!;
 
-const getSquareColor = (square) => {
+const getSquareColor = (square: string): SquareColor => {
   const file = FILES.indexOf(square[0]) + 1;
   const rank = parseInt(square[1]);
   return (file + rank) % 2 === 0 ? 'dark' : 'light';
 };
 
-const randomSquare = () => {
+const randomSquare = (): string => {
   const pool = getActiveSquares();
   return pool[Math.floor(Math.random() * pool.length)];
 };
 
 // --- UI state transitions ---
-const showIdle = () => {
+const showIdle = (): void => {
   state = 'idle';
   locked = true;
   squareDisplay.textContent = '--';
@@ -88,7 +100,7 @@ const showIdle = () => {
   setLevelButtonsEnabled(true);
 };
 
-const showDone = () => {
+const showDone = (): void => {
   state = 'done';
   locked = true;
   const pct = Math.round((correct / total) * 100);
@@ -104,7 +116,7 @@ const showDone = () => {
   speak('Round complete. ' + correct + ' out of ' + total + '. ' + pctSpoken + ' percent.');
 };
 
-const showPlaying = () => {
+const showPlaying = (): void => {
   state = 'playing';
   btnLight.classList.remove('hidden');
   btnDark.classList.remove('hidden');
@@ -112,14 +124,14 @@ const showPlaying = () => {
   setLevelButtonsEnabled(false);
 };
 
-const setLevelButtonsEnabled = (enabled) => {
-  for (const btn of levelBar.querySelectorAll('.level-btn')) {
+const setLevelButtonsEnabled = (enabled: boolean): void => {
+  for (const btn of levelBar.querySelectorAll('.level-btn') as NodeListOf<HTMLButtonElement>) {
     btn.disabled = !enabled;
   }
 };
 
 // --- Game logic ---
-const startSession = () => {
+const startSession = (): void => {
   correct = 0;
   total = 0;
   history = [];
@@ -131,7 +143,7 @@ const startSession = () => {
   speak('Level ' + LEVELS[currentLevel].label + '. ' + ROUND_COUNT + ' questions. Go!', () => nextRound());
 };
 
-const nextRound = () => {
+const nextRound = (): void => {
   if (total >= ROUND_COUNT) {
     showDone();
     return;
@@ -147,15 +159,15 @@ const nextRound = () => {
   speak(speakSquare(currentSquare));
 };
 
-const updateStats = () => {
-  correctCount.textContent = correct;
-  totalCount.textContent = total;
+const updateStats = (): void => {
+  correctCount.textContent = String(correct);
+  totalCount.textContent = String(total);
   if (total > 0) {
     accuracyValue.textContent = Math.round((correct / total) * 100) + '%';
   }
 };
 
-const updateStreakBar = () => {
+const updateStreakBar = (): void => {
   streakBar.innerHTML = '';
   for (const result of history) {
     const dot = document.createElement('div');
@@ -164,11 +176,11 @@ const updateStreakBar = () => {
   }
 };
 
-const answer = (choice) => {
+const answer = (choice: SquareColor): void => {
   if (locked || state !== 'playing') return;
   locked = true;
 
-  const correctColor = getSquareColor(currentSquare);
+  const correctColor = getSquareColor(currentSquare!);
   const isCorrect = choice === correctColor;
 
   if (isCorrect) {
@@ -177,7 +189,7 @@ const answer = (choice) => {
     speak(correctColor, () => nextRound());
   } else {
     squareDisplay.classList.add('wrong');
-    speak('Wrong! ' + speakSquare(currentSquare) + ' is ' + correctColor, () => nextRound());
+    speak('Wrong! ' + speakSquare(currentSquare!) + ' is ' + correctColor, () => nextRound());
   }
 
   total++;
@@ -191,7 +203,7 @@ const answer = (choice) => {
 };
 
 // --- Input ---
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', (e: KeyboardEvent) => {
   if (state === 'playing') {
     if (locked) return;
     if (e.key === 'ArrowLeft') answer('light');
@@ -209,12 +221,12 @@ btnLight.addEventListener('click', () => answer('light'));
 btnDark.addEventListener('click', () => answer('dark'));
 
 // --- Gamepad support ---
-const gamepadDot = document.getElementById('gamepadDot');
-const gamepadLabel = document.getElementById('gamepadLabel');
-let gamepadIndex = null;
-let prevButtons = {};
+const gamepadDot = document.getElementById('gamepadDot')!;
+const gamepadLabel = document.getElementById('gamepadLabel')!;
+let gamepadIndex: number | null = null;
+let prevButtons: Record<string, number | boolean> = {};
 
-window.addEventListener('gamepadconnected', (e) => {
+window.addEventListener('gamepadconnected', (e: GamepadEvent) => {
   gamepadIndex = e.gamepad.index;
   gamepadDot.classList.add('connected');
   gamepadLabel.textContent = e.gamepad.id;
@@ -227,17 +239,17 @@ window.addEventListener('gamepaddisconnected', () => {
   gamepadLabel.textContent = 'No gamepad detected';
 });
 
-const isPressed = (gamepad, index) => {
+const isPressed = (gamepad: Gamepad, index: number): boolean => {
   return gamepad.buttons[index] && gamepad.buttons[index].pressed;
 };
 
-const wasJustPressed = (gamepad, index) => {
+const wasJustPressed = (gamepad: Gamepad, index: number): boolean => {
   const pressed = isPressed(gamepad, index);
   const was = !!prevButtons[index];
   return pressed && !was;
 };
 
-const pollGamepad = () => {
+const pollGamepad = (): void => {
   requestAnimationFrame(pollGamepad);
 
   if (gamepadIndex === null) return;
@@ -262,7 +274,7 @@ const pollGamepad = () => {
 
     // Axes-based D-pad fallback (some drivers/OS combos)
     const axisX = gp.axes[0] || 0;
-    const prevAxisX = prevButtons.axisX || 0;
+    const prevAxisX = (prevButtons.axisX as number) || 0;
     if (axisX < -0.5 && prevAxisX >= -0.5) lightPressed = true;
     if (axisX > 0.5 && prevAxisX <= 0.5) darkPressed = true;
 
@@ -286,9 +298,9 @@ const pollGamepad = () => {
 requestAnimationFrame(pollGamepad);
 
 // --- Level selector ---
-const levelBar = document.getElementById('levelBar');
+const levelBar = document.getElementById('levelBar')!;
 
-const renderLevels = () => {
+const renderLevels = (): void => {
   levelBar.innerHTML = '';
   LEVELS.forEach((level, i) => {
     const btn = document.createElement('button');
@@ -300,7 +312,7 @@ const renderLevels = () => {
   });
 };
 
-const selectLevel = (index) => {
+const selectLevel = (index: number): void => {
   if (state === 'playing') return;
   currentLevel = index;
   renderLevels();
