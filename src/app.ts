@@ -81,9 +81,14 @@ const getSquareColor = (square: string): SquareColor => {
   return (file + rank) % 2 === 0 ? 'dark' : 'light';
 };
 
+const recentSquares: string[] = [];
+
 const randomSquare = (): string => {
-  const pool = getActiveSquares();
-  return pool[Math.floor(Math.random() * pool.length)];
+  const pool = getActiveSquares().filter(s => !recentSquares.includes(s));
+  const square = pool[Math.floor(Math.random() * pool.length)];
+  recentSquares.push(square);
+  if (recentSquares.length > 2) recentSquares.shift();
+  return square;
 };
 
 // --- UI state transitions ---
