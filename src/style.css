@@ -7,7 +7,7 @@
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   background-color: #121212;
   color: #e0e0e0;
   min-height: 100vh;
@@ -47,7 +47,9 @@ h1 {
   font-weight: 700;
   letter-spacing: 0.05em;
   color: #ffffff;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .square-display.correct {
@@ -75,7 +77,10 @@ h1 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -232,7 +237,10 @@ kbd {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
 }
 
 .level-btn:hover {
@@ -263,7 +271,9 @@ kbd {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.15s, background 0.15s;
+  transition:
+    transform 0.15s,
+    background 0.15s;
 }
 
 .btn-start:hover {
@@ -283,5 +293,5 @@ kbd {
 }
 
 .hidden {
-  display: none !important;
+  display: none;
 }
