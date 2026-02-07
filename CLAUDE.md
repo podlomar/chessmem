@@ -28,6 +28,10 @@ Single-page app, all source in `src/`:
 
 Square color determination: `(fileIndex + rank) % 2 === 0` → dark, else light (1-indexed file). See `getSquareColor()`.
 
+## Coding Rules
+
+- **No implicit boolean coercion** — always use explicit comparisons instead of truthy/falsy checks. Write `if (gp === null)` or `if (value === undefined)` instead of `if (!gp)` or `if (value)`. Biome does not enforce this yet, so follow it manually.
+
 ## Commit Convention
 
 Uses conventional commits with emoji prefixes (e.g., `✨ feat:`, `🐛 fix:`). See `.claude/commands/commit.md` for full reference.
