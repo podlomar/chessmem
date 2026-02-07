@@ -2,7 +2,7 @@ const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const ROUND_COUNT = 20;
 
 // --- Levels ---
-function squaresFrom(files, ranks) {
+const squaresFrom = (files, ranks) => {
   const result = [];
   for (const f of files) {
     for (const r of ranks) {
@@ -10,7 +10,7 @@ function squaresFrom(files, ranks) {
     }
   }
   return result;
-}
+};
 
 const LEVELS = [
   { label: '1', description: 'a-c 1-3', squares: squaresFrom('abc', '123') },
@@ -20,28 +20,28 @@ const LEVELS = [
 
 let currentLevel = 0;
 
-function getActiveSquares() {
+const getActiveSquares = () => {
   const pool = [];
   for (let i = 0; i <= currentLevel; i++) {
     pool.push(...LEVELS[i].squares);
   }
   return pool;
-}
+};
 
 // --- Voice feedback ---
 const synth = window.speechSynthesis;
 
-function speakSquare(square) {
+const speakSquare = (square) => {
   return square[0].toUpperCase() + ' ' + square[1];
-}
+};
 
-function speak(text, onEnd) {
+const speak = (text, onEnd) => {
   synth.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.9;
   if (onEnd) utterance.addEventListener('end', onEnd);
   synth.speak(utterance);
-}
+};
 
 // --- State ---
 // 'idle' = waiting to start, 'playing' = in session, 'done' = showing results
@@ -63,19 +63,19 @@ const btnLight = document.getElementById('btnLight');
 const btnDark = document.getElementById('btnDark');
 const progressDisplay = document.getElementById('progressDisplay');
 
-function getSquareColor(square) {
+const getSquareColor = (square) => {
   const file = FILES.indexOf(square[0]) + 1;
   const rank = parseInt(square[1]);
   return (file + rank) % 2 === 0 ? 'dark' : 'light';
-}
+};
 
-function randomSquare() {
+const randomSquare = () => {
   const pool = getActiveSquares();
   return pool[Math.floor(Math.random() * pool.length)];
-}
+};
 
 // --- UI state transitions ---
-function showIdle() {
+const showIdle = () => {
   state = 'idle';
   locked = true;
   squareDisplay.textContent = '--';
@@ -86,9 +86,9 @@ function showIdle() {
   startBtn.textContent = 'Start';
   progressDisplay.textContent = '';
   setLevelButtonsEnabled(true);
-}
+};
 
-function showDone() {
+const showDone = () => {
   state = 'done';
   locked = true;
   const pct = Math.round((correct / total) * 100);
@@ -102,24 +102,24 @@ function showDone() {
   setLevelButtonsEnabled(true);
   const pctSpoken = Math.round((correct / total) * 100);
   speak('Round complete. ' + correct + ' out of ' + total + '. ' + pctSpoken + ' percent.');
-}
+};
 
-function showPlaying() {
+const showPlaying = () => {
   state = 'playing';
   btnLight.classList.remove('hidden');
   btnDark.classList.remove('hidden');
   startBtn.classList.add('hidden');
   setLevelButtonsEnabled(false);
-}
+};
 
-function setLevelButtonsEnabled(enabled) {
+const setLevelButtonsEnabled = (enabled) => {
   for (const btn of levelBar.querySelectorAll('.level-btn')) {
     btn.disabled = !enabled;
   }
-}
+};
 
 // --- Game logic ---
-function startSession() {
+const startSession = () => {
   correct = 0;
   total = 0;
   history = [];
@@ -129,9 +129,9 @@ function startSession() {
   streakBar.innerHTML = '';
   showPlaying();
   speak('Level ' + LEVELS[currentLevel].label + '. ' + ROUND_COUNT + ' questions. Go!', () => nextRound());
-}
+};
 
-function nextRound() {
+const nextRound = () => {
   if (total >= ROUND_COUNT) {
     showDone();
     return;
@@ -145,26 +145,26 @@ function nextRound() {
   btnDark.disabled = false;
   progressDisplay.textContent = (total + 1) + ' / ' + ROUND_COUNT;
   speak(speakSquare(currentSquare));
-}
+};
 
-function updateStats() {
+const updateStats = () => {
   correctCount.textContent = correct;
   totalCount.textContent = total;
   if (total > 0) {
     accuracyValue.textContent = Math.round((correct / total) * 100) + '%';
   }
-}
+};
 
-function updateStreakBar() {
+const updateStreakBar = () => {
   streakBar.innerHTML = '';
   for (const result of history) {
     const dot = document.createElement('div');
     dot.className = 'streak-dot ' + (result ? 'correct' : 'wrong');
     streakBar.appendChild(dot);
   }
-}
+};
 
-function answer(choice) {
+const answer = (choice) => {
   if (locked || state !== 'playing') return;
   locked = true;
 
@@ -188,7 +188,7 @@ function answer(choice) {
 
   btnLight.disabled = true;
   btnDark.disabled = true;
-}
+};
 
 // --- Input ---
 document.addEventListener('keydown', (e) => {
@@ -205,6 +205,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 startBtn.addEventListener('click', () => startSession());
+btnLight.addEventListener('click', () => answer('light'));
+btnDark.addEventListener('click', () => answer('dark'));
 
 // --- Gamepad support ---
 const gamepadDot = document.getElementById('gamepadDot');
@@ -225,17 +227,17 @@ window.addEventListener('gamepaddisconnected', () => {
   gamepadLabel.textContent = 'No gamepad detected';
 });
 
-function isPressed(gamepad, index) {
+const isPressed = (gamepad, index) => {
   return gamepad.buttons[index] && gamepad.buttons[index].pressed;
-}
+};
 
-function wasJustPressed(gamepad, index) {
+const wasJustPressed = (gamepad, index) => {
   const pressed = isPressed(gamepad, index);
   const was = !!prevButtons[index];
   return pressed && !was;
-}
+};
 
-function pollGamepad() {
+const pollGamepad = () => {
   requestAnimationFrame(pollGamepad);
 
   if (gamepadIndex === null) return;
@@ -279,14 +281,14 @@ function pollGamepad() {
     prevButtons[i] = gp.buttons[i].pressed;
   }
   prevButtons.axisX = gp.axes[0] || 0;
-}
+};
 
 requestAnimationFrame(pollGamepad);
 
 // --- Level selector ---
 const levelBar = document.getElementById('levelBar');
 
-function renderLevels() {
+const renderLevels = () => {
   levelBar.innerHTML = '';
   LEVELS.forEach((level, i) => {
     const btn = document.createElement('button');
@@ -296,13 +298,13 @@ function renderLevels() {
     btn.addEventListener('click', () => selectLevel(i));
     levelBar.appendChild(btn);
   });
-}
+};
 
-function selectLevel(index) {
+const selectLevel = (index) => {
   if (state === 'playing') return;
   currentLevel = index;
   renderLevels();
-}
+};
 
 renderLevels();
 showIdle();
