@@ -51,7 +51,7 @@ const speak = (text: string, onEnd?: () => void): void => {
   synth.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.9;
-  if (onEnd) {
+  if (onEnd !== undefined) {
     utterance.addEventListener("end", onEnd);
   }
   synth.speak(utterance);
@@ -272,7 +272,7 @@ const pollGamepad = (): void => {
 
   const gamepads = navigator.getGamepads();
   const gp = gamepads[gamepadIndex];
-  if (!gp) {
+  if (gp === null) {
     return;
   }
 
@@ -291,8 +291,8 @@ const pollGamepad = (): void => {
     let darkPressed = darkButtons.some((b) => wasJustPressed(gp, b));
 
     // Axes-based D-pad fallback (some drivers/OS combos)
-    const axisX = gp.axes[0] || 0;
-    const prevAxisX = (prevButtons.axisX as number) || 0;
+    const axisX = gp.axes[0] ?? 0;
+    const prevAxisX = (prevButtons.axisX as number) ?? 0;
     if (axisX < -0.5 && prevAxisX >= -0.5) {
       lightPressed = true;
     }
@@ -317,7 +317,7 @@ const pollGamepad = (): void => {
   for (let i = 0; i < gp.buttons.length; i++) {
     prevButtons[i] = gp.buttons[i].pressed;
   }
-  prevButtons.axisX = gp.axes[0] || 0;
+  prevButtons.axisX = gp.axes[0] ?? 0;
 };
 
 requestAnimationFrame(pollGamepad);
